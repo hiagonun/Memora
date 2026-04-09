@@ -103,6 +103,22 @@ export async function getPendingRevisions(targetDateStr: string) {
   return data as RevisionRecord[];
 }
 
+export async function getMonthRevisions(startDateStr: string, endDateStr: string) {
+  const { data, error } = await supabase
+    .from("revisions")
+    .select(`
+      *,
+      study:studies (*)
+    `)
+    .gte("revision_date", startDateStr)
+    .lte("revision_date", endDateStr)
+    .order("revision_date", { ascending: true })
+    .order("revision_number", { ascending: true });
+    
+  if (error) throw new Error(error.message);
+  return data as RevisionRecord[];
+}
+
 export async function markRevisionCompleted(revisionId: string, completed: boolean = true) {
   const { error } = await supabase
     .from("revisions")
