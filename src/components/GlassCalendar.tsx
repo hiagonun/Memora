@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, parseISO, startOfWeek, endOfWeek, addMonths, subMonths, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, CheckCircle2, Circle, Trash2 } from "lucide-react";
@@ -20,24 +20,34 @@ export function GlassCalendar() {
   const [deletingStudyId, setDeletingStudyId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const loadMonthRevisions = useCallback(async () => {
+    const start = startOfWeek(startOfMonth(currentDate), { weekStartsOn: 0 });
+    const end = endOfWeek(endOfMonth(currentDate), { weekStartsOn: 0 });
+
+    const startStr = format(start, "yyyy-MM-dd");
+    const endStr = format(end, "yyyy-MM-dd");
+
+    try {
+      const data = await getMonthRevisions(startStr, endStr);
+      setRevisions(data || []);
+    } catch (err) {
+      console.error("Erro ao carregar revisões:", err);
+    }
+  }, [currentDate]);
+
   // Carregar revisões do mês inteiro
   useEffect(() => {
-    async function load() {
-      const start = startOfWeek(startOfMonth(currentDate), { weekStartsOn: 0 });
-      const end = endOfWeek(endOfMonth(currentDate), { weekStartsOn: 0 });
-      
-      const startStr = format(start, "yyyy-MM-dd");
-      const endStr = format(end, "yyyy-MM-dd");
+    void loadMonthRevisions();
+  }, [loadMonthRevisions]);
 
-      try {
-        const data = await getMonthRevisions(startStr, endStr);
-        setRevisions(data || []);
-      } catch (err) {
-        console.error("Erro ao carregar revisões:", err);
-      }
-    }
-    load();
-  }, [currentDate]);
+  useEffect(() => {
+    const handleStudyCreated = () => {
+      void loadMonthRevisions();
+    };
+
+    window.addEventListener("memora:study-created", handleStudyCreated);
+    return () => window.removeEventListener("memora:study-created", handleStudyCreated);
+  }, [loadMonthRevisions]);
 
   // Lista dos dias na visualização do mês atual
   const daysInMonth = eachDayOfInterval({
@@ -285,7 +295,7 @@ export function GlassCalendar() {
 
       {/* Confirmação de Exclusão Customizada (Glass Modal) */}
       {deletingStudyId && (
-        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-sky-950/40 p-3 sm:items-center sm:p-4">
+        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-sky-950/65 backdrop-blur-sm p-3 sm:items-center sm:p-4">
           <div className="w-full max-w-sm pb-[env(safe-area-inset-bottom,0px)] sm:pb-0">
             <GlassCard className="border-sky-200/20 p-6 text-center sm:p-8">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-rose-500/15 ring-1 ring-rose-400/25">

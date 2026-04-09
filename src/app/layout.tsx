@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { AuthGate } from "@/components/AuthGate";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -21,8 +22,6 @@ export const viewport: Viewport = {
   ],
 };
 
-import { NavBar } from "@/components/NavBar";
-
 import { Toaster } from "@/components/ui/sonner";
 
 export default function RootLayout({
@@ -32,9 +31,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className={`${inter.variable} dark h-full antialiased`} suppressHydrationWarning>
-      <body className="min-h-full min-h-[100dvh] flex flex-col relative font-sans text-foreground bg-background placeholder:text-muted-foreground pt-[calc(5.25rem+env(safe-area-inset-top,0px))] pb-[env(safe-area-inset-bottom,0px)] selection:bg-sky-400/30 selection:text-sky-50" suppressHydrationWarning>
-        <NavBar />
-        {children}
+      <body className="min-h-full min-h-[100dvh] flex flex-col relative font-sans text-foreground bg-background placeholder:text-muted-foreground pb-[env(safe-area-inset-bottom,0px)] selection:bg-sky-400/30 selection:text-sky-50" suppressHydrationWarning>
+        <AuthGate>{children}</AuthGate>
         <Toaster richColors closeButton />
       </body>
     </html>

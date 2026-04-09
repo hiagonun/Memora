@@ -61,6 +61,9 @@ export function StudyForm() {
       }
 
       toast.success("Estudo cadastrado e sincronizado!");
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("memora:study-created", { detail: { studyDate } }));
+      }
       setSubject("");
       setTopic("");
       setIsOpen(false);
