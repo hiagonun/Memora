@@ -76,3 +76,45 @@ export async function deleteGoogleCalendarEvent(providerToken: string, eventId: 
     throw new Error(message || "Falha ao deletar no Google Calendar");
   }
 }
+
+export async function updateGoogleCalendarEvent(
+  providerToken: string,
+  eventId: string,
+  payload: {
+    summary: string;
+    description: string;
+  }
+) {
+  const encodedId = encodeURIComponent(eventId);
+  const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events/${encodedId}`;
+
+  const response = await fetch(url, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${providerToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      summary: payload.summary,
+      description: payload.description,
+    }),
+  });
+
+  if (response.status === 404 || response.status === 410) {
+    return;
+  }
+
+  if (!response.ok) {
+    const text = await response.text();
+    let message = text;
+    try {
+      const err = JSON.parse(text) as { error?: { message?: string } };
+      message = err.error?.message ?? text;
+    } catch {
+      /* use raw text */
+    }
+    throw new Error(message || "Falha ao atualizar evento no Google Calendar");
+  }
+
+  return response.json();
+}

@@ -8,7 +8,7 @@ import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { deleteStudy, getStudies, StudyRecord, updateStudy } from "@/lib/spacedRepetition";
 import { supabase } from "@/lib/supabase/client";
-import { deleteGoogleCalendarEvent } from "@/lib/googleCalendar";
+import { deleteGoogleCalendarEvent, updateGoogleCalendarEvent } from "@/lib/googleCalendar";
 
 const inputClass =
   "w-full min-h-[42px] rounded-xl border border-sky-200/15 bg-sky-950/30 px-3 py-2 text-sm text-sky-50 outline-none transition-colors placeholder:text-sky-300/35 focus:border-sky-300/40 focus:ring-2 focus:ring-sky-400/35";
@@ -77,12 +77,53 @@ export function StudyManager() {
       return;
     }
 
+    const nextSubject = editSubject.trim();
+    const nextTopic = editTopic.trim();
+
     setSavingId(studyId);
     try {
       await updateStudy(studyId, {
-        subject: editSubject.trim(),
-        topic: editTopic.trim(),
+        subject: nextSubject,
+        topic: nextTopic,
       });
+
+      const { data: revisionData } = await supabase
+        .from("revisions")
+        .select("calendar_event_id, revision_number")
+        .eq("study_id", studyId);
+
+      const linkedEvents =
+        revisionData
+          ?.filter((r) => Boolean(r.calendar_event_id))
+          .map((r) => ({
+            eventId: r.calendar_event_id as string,
+            revisionNumber: r.revision_number as number,
+          })) ?? [];
+
+      if (linkedEvents.length > 0) {
+        let providerToken: string | undefined;
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        providerToken = session?.provider_token ?? undefined;
+
+        if (!providerToken) {
+          const { data: refreshed } = await supabase.auth.refreshSession();
+          providerToken = refreshed.session?.provider_token ?? undefined;
+        }
+
+        if (!providerToken) {
+          toast.error("Estudo salvo no Memora, mas não foi possível atualizar no Google Calendar.");
+        } else {
+          for (const linkedEvent of linkedEvents) {
+            await updateGoogleCalendarEvent(providerToken, linkedEvent.eventId, {
+              summary: `Revisão R${linkedEvent.revisionNumber} - ${nextSubject}`,
+              description: `Revisão do assunto: ${nextTopic}. Curva do Esquecimento.`,
+            });
+          }
+        }
+      }
+
       toast.success("Estudo atualizado com sucesso.");
       cancelEdit();
       await loadStudies();
