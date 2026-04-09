@@ -3,17 +3,22 @@
 import { useCallback, useEffect, useState } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
-import { BookOpen } from "lucide-react";
-import { MemoraLogo } from "@/components/MemoraLogo";
+import { BookOpen, Loader2 } from "lucide-react";
 import { StudyManager } from "@/components/StudyManager";
 import { GlassCalendar } from "@/components/GlassCalendar";
-import { getPendingRevisions } from "@/lib/spacedRepetition";
+import { getPendingRevisions, markRevisionCompleted, type RevisionRecord } from "@/lib/spacedRepetition";
+import { updateGoogleCalendarEvent } from "@/lib/googleCalendar";
+import { supabase } from "@/lib/supabase/client";
+import { toast } from "sonner";
+import Swal from "sweetalert2";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"studies" | "calendar">("studies");
   const [todaySubjectsCount, setTodaySubjectsCount] = useState(0);
+  const [todayPendingRevisions, setTodayPendingRevisions] = useState<RevisionRecord[]>([]);
+  const [isCompletingToday, setIsCompletingToday] = useState(false);
 
-  const loadTodayCount = useCallback(async () => {
+  const loadTodayData = useCallback(async () => {
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, "0");
@@ -23,20 +28,95 @@ export default function Home() {
     try {
       const pending = await getPendingRevisions(todayStr);
       const uniqueStudyIds = new Set(pending.map((rev) => rev.study_id));
+      setTodayPendingRevisions(pending);
       setTodaySubjectsCount(uniqueStudyIds.size);
     } catch {
+      setTodayPendingRevisions([]);
       setTodaySubjectsCount(0);
     }
   }, []);
 
+  const handleCompleteToday = async () => {
+    if (todayPendingRevisions.length === 0 || isCompletingToday) return;
+
+    const confirmation = await Swal.fire({
+      title: "Concluir revisões de hoje?",
+      text: "Marcaremos todas as revisões pendentes de hoje como concluídas no Memora e no Google Calendar.",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Concluir",
+      cancelButtonText: "Cancelar",
+      reverseButtons: true,
+      customClass: {
+        container: "memora-swal-container",
+        popup: "memora-swal-popup",
+        title: "memora-swal-title",
+        htmlContainer: "memora-swal-text",
+        actions: "memora-swal-actions",
+        confirmButton: "memora-swal-confirm",
+        cancelButton: "memora-swal-cancel",
+      },
+    });
+
+    if (!confirmation.isConfirmed) return;
+
+    setIsCompletingToday(true);
+    const toastId = toast.loading("Concluindo revisões de hoje...");
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      let providerToken = session?.provider_token ?? undefined;
+
+      const hasGoogleEvents = todayPendingRevisions.some((rev) => Boolean(rev.calendar_event_id));
+      if (!providerToken && hasGoogleEvents) {
+        const { data: refreshed } = await supabase.auth.refreshSession();
+        providerToken = refreshed.session?.provider_token ?? undefined;
+      }
+
+      for (const revision of todayPendingRevisions) {
+        await markRevisionCompleted(revision.id, true);
+
+        if (revision.calendar_event_id && providerToken) {
+          const subject = revision.study?.subject ?? "Estudo";
+          const topic = revision.study?.topic ?? "";
+
+          await updateGoogleCalendarEvent(providerToken, revision.calendar_event_id, {
+            summary: `Concluída - Revisão R${revision.revision_number} - ${subject}`,
+            description: `Revisão concluída no Memora. Assunto: ${topic}. Curva do Esquecimento.`,
+          });
+        }
+      }
+
+      if (hasGoogleEvents && !providerToken) {
+        toast.error("Revisões concluídas no Memora, mas sem sincronizar no Google Calendar.", {
+          id: toastId,
+          duration: 7000,
+        });
+      } else {
+        toast.success("Revisões de hoje concluídas com sucesso!", { id: toastId });
+      }
+
+      window.dispatchEvent(new CustomEvent("memora:studies-changed"));
+      await loadTodayData();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erro ao concluir revisões de hoje.";
+      toast.error(message, { id: toastId });
+    } finally {
+      setIsCompletingToday(false);
+    }
+  };
+
   useEffect(() => {
     if (activeTab !== "calendar") return;
-    void loadTodayCount();
-  }, [activeTab, loadTodayCount]);
+    void loadTodayData();
+  }, [activeTab, loadTodayData]);
 
   useEffect(() => {
     const refresh = () => {
-      void loadTodayCount();
+      void loadTodayData();
     };
 
     window.addEventListener("memora:study-created", refresh);
@@ -46,7 +126,7 @@ export default function Home() {
       window.removeEventListener("memora:study-created", refresh);
       window.removeEventListener("memora:studies-changed", refresh);
     };
-  }, [loadTodayCount]);
+  }, [loadTodayData]);
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center px-3 py-6 sm:px-5 sm:py-10 md:px-8">
@@ -111,9 +191,12 @@ export default function Home() {
               </div>
               <Button
                 variant="outline"
+                onClick={() => void handleCompleteToday()}
+                disabled={todayPendingRevisions.length === 0 || isCompletingToday}
                 className="h-11 w-full shrink-0 rounded-full border-sky-300/25 bg-sky-400/10 text-sky-50 hover:bg-sky-400/20 sm:ml-auto sm:h-10 sm:w-auto sm:px-8"
               >
-                Começar
+                {isCompletingToday && <Loader2 className="h-4 w-4 animate-spin" />}
+                {todayPendingRevisions.length === 0 ? "Tudo em dia" : "Concluir revisões"}
               </Button>
             </GlassCard>
           </div>

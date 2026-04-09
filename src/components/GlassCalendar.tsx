@@ -15,7 +15,9 @@ import Swal from "sweetalert2";
 export function GlassCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [revisions, setRevisions] = useState<RevisionRecord[]>([]);
-  const [selectedDateStr, setSelectedDateStr] = useState<string | null>(null);
+  const [selectedDateStr, setSelectedDateStr] = useState<string | null>(() =>
+    format(new Date(), "yyyy-MM-dd")
+  );
 
   const [isDeleting, setIsDeleting] = useState(false);
 
