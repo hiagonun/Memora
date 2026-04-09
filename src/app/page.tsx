@@ -3,6 +3,7 @@
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Calendar as CalendarIcon, BookOpen } from "lucide-react";
+import { StudyForm } from "@/components/StudyForm";
 
 export default function Home() {
   return (
@@ -18,18 +19,7 @@ export default function Home() {
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <GlassCard className="flex flex-col items-center justify-center p-12 text-center group cursor-pointer">
-            <div className="w-16 h-16 rounded-2xl bg-white/40 dark:bg-black/40 flex items-center justify-center mb-6 shadow-inner transition-transform group-hover:scale-110">
-              <PlusCircle className="w-8 h-8 text-cyan-500 dark:text-cyan-400" />
-            </div>
-            <h2 className="text-2xl font-medium mb-2">Novo Estudo</h2>
-            <p className="text-slate-500 dark:text-slate-400 mb-6">
-              Registre uma nova matéria e nós calcularemos suas 5 revisões automaticamente.
-            </p>
-            <Button className="rounded-full px-8 bg-slate-900/80 hover:bg-slate-900 dark:bg-white/80 dark:hover:bg-white dark:text-black backdrop-blur-md border border-white/20 transition-all font-medium">
-              Adicionar
-            </Button>
-          </GlassCard>
+          <StudyForm />
 
           <GlassCard className="flex flex-col items-center justify-center p-12 text-center group cursor-pointer">
             <div className="w-16 h-16 rounded-2xl bg-white/40 dark:bg-black/40 flex items-center justify-center mb-6 shadow-inner transition-transform group-hover:scale-110">

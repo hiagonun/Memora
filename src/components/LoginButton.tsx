@@ -26,8 +26,10 @@ export function LoginButton() {
   }, []);
 
   const handleLogin = async () => {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-      alert("Configure as credenciais do Supabase no .env para testar o login.");
+    const isConfigMissing = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "https://dummy.supabase.co";
+    
+    if (isConfigMissing) {
+      alert("Configure as credenciais do Supabase no arquivo .env (NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY) para testar o login.");
       return;
     }
 
