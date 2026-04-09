@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Pencil, Trash2, Check, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import Swal from "sweetalert2";
 import { StudyForm } from "@/components/StudyForm";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
@@ -179,20 +180,27 @@ export function StudyManager() {
   };
 
   const requestDelete = (studyId: string) => {
-    toast("Apagar este estudo e todas as revisões vinculadas?", {
-      duration: 10000,
-      cancel: {
-        label: "Cancelar",
-        onClick: () => {
-          toast.message("Exclusão cancelada.");
-        },
+    void Swal.fire({
+      title: "Apagar estudo?",
+      text: "Esta ação remove o estudo e todas as revisões vinculadas.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Apagar",
+      cancelButtonText: "Cancelar",
+      reverseButtons: true,
+      customClass: {
+        container: "memora-swal-container",
+        popup: "memora-swal-popup",
+        title: "memora-swal-title",
+        htmlContainer: "memora-swal-text",
+        actions: "memora-swal-actions",
+        confirmButton: "memora-swal-confirm",
+        cancelButton: "memora-swal-cancel",
       },
-      action: {
-        label: "Apagar",
-        onClick: () => {
-          void handleDelete(studyId);
-        },
-      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        void handleDelete(studyId);
+      }
     });
   };
 

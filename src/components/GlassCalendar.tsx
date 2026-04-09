@@ -10,14 +10,13 @@ import { getMonthRevisions, markRevisionCompleted, deleteStudy, RevisionRecord }
 import { supabase } from "@/lib/supabase/client";
 import { deleteGoogleCalendarEvent } from "@/lib/googleCalendar";
 import { toast } from "sonner";
+import Swal from "sweetalert2";
 
 export function GlassCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [revisions, setRevisions] = useState<RevisionRecord[]>([]);
   const [selectedDateStr, setSelectedDateStr] = useState<string | null>(null);
-  
-  // Deletion logic with custom modal
-  const [deletingStudyId, setDeletingStudyId] = useState<string | null>(null);
+
   const [isDeleting, setIsDeleting] = useState(false);
 
   const loadMonthRevisions = useCallback(async () => {
@@ -83,11 +82,9 @@ export function GlassCalendar() {
     }
   };
 
-  const handleDeleteStudy = async () => {
-    if (!deletingStudyId) return;
+  const handleDeleteStudy = async (studyId: string) => {
     setIsDeleting(true);
-    const studyId = deletingStudyId;
-    
+
     const toastId = toast.loading("Removendo estudo e agendamentos...");
 
     try {
@@ -124,7 +121,6 @@ export function GlassCalendar() {
       await deleteStudy(studyId);
       setRevisions((prev) => prev.filter((r) => r.study_id !== studyId));
       toast.success("Matéria removida com sucesso de todos os lugares!", { id: toastId });
-      setDeletingStudyId(null);
     } catch (err) {
       console.error("Erro crítico ao apagar estudo:", err);
       const msg =
@@ -133,6 +129,33 @@ export function GlassCalendar() {
     } finally {
       setIsDeleting(false);
     }
+  };
+
+  const requestDeleteStudy = (studyId: string) => {
+    if (isDeleting) return;
+
+    void Swal.fire({
+      title: "Apagar estudo?",
+      text: "Remove a matéria no Memora e os eventos ligados no Google Calendar.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Apagar",
+      cancelButtonText: "Cancelar",
+      reverseButtons: true,
+      customClass: {
+        container: "memora-swal-container",
+        popup: "memora-swal-popup",
+        title: "memora-swal-title",
+        htmlContainer: "memora-swal-text",
+        actions: "memora-swal-actions",
+        confirmButton: "memora-swal-confirm",
+        cancelButton: "memora-swal-cancel",
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        void handleDeleteStudy(studyId);
+      }
+    });
   };
 
   const weekLabels = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"] as const;
@@ -282,10 +305,11 @@ export function GlassCalendar() {
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (rev.study_id) setDeletingStudyId(rev.study_id);
+                        if (rev.study_id) requestDeleteStudy(rev.study_id);
                       }}
-                      className="flex h-11 w-11 shrink-0 touch-manipulation items-center justify-center rounded-full text-rose-400/90 transition-colors hover:bg-rose-500/15 hover:text-rose-300"
+                      className="flex h-11 w-11 shrink-0 touch-manipulation items-center justify-center rounded-full text-rose-400/90 transition-colors hover:bg-rose-500/15 hover:text-rose-300 disabled:opacity-50"
                       title="Apagar matéria"
+                      disabled={isDeleting}
                     >
                       <Trash2 className="h-5 w-5" />
                     </button>
@@ -294,40 +318,6 @@ export function GlassCalendar() {
               </div>
             )}
           </GlassCard>
-        </div>
-      )}
-
-      {/* Confirmação de Exclusão Customizada (Glass Modal) */}
-      {deletingStudyId && (
-        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-sky-950/65 backdrop-blur-sm p-3 sm:items-center sm:p-4">
-          <div className="w-full max-w-sm pb-[env(safe-area-inset-bottom,0px)] sm:pb-0">
-            <GlassCard className="border-sky-200/20 p-6 text-center sm:p-8">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-rose-500/15 ring-1 ring-rose-400/25">
-                <Trash2 className="h-8 w-8 text-rose-400" />
-              </div>
-              <h3 className="mb-2 text-lg font-medium text-sky-50 sm:text-xl">Apagar estudo?</h3>
-              <p className="mb-6 text-sm leading-relaxed text-sky-200/65">
-                Remove a matéria no Memora e os eventos ligados no Google Calendar.
-              </p>
-              <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
-                <Button
-                  variant="ghost"
-                  className="h-11 w-full rounded-full border border-sky-200/15 text-sky-100 hover:bg-sky-400/10 sm:flex-1"
-                  onClick={() => setDeletingStudyId(null)}
-                  disabled={isDeleting}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  className="h-11 w-full rounded-full border-0 bg-rose-500 text-white transition-colors hover:bg-rose-600 sm:flex-1"
-                  onClick={handleDeleteStudy}
-                  disabled={isDeleting}
-                >
-                  {isDeleting ? "Apagando..." : "Apagar"}
-                </Button>
-              </div>
-            </GlassCard>
-          </div>
         </div>
       )}
     </div>
