@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { User as AuthUser } from "@supabase/supabase-js";
 import { LogOut, UserCircle } from "lucide-react";
+import { toast } from "sonner";
 
 export function LoginButton() {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -31,8 +32,9 @@ export function LoginButton() {
       process.env.NEXT_PUBLIC_SUPABASE_URL === "https://dummy.supabase.co";
 
     if (isConfigMissing) {
-      alert(
-        "Configure as credenciais do Supabase no arquivo .env (NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY) para testar o login."
+      toast.error(
+        "Configure as credenciais do Supabase no arquivo .env (NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY) para testar o login.",
+        { duration: 7000 }
       );
       return;
     }

@@ -137,9 +137,6 @@ export function StudyManager() {
   };
 
   const handleDelete = async (studyId: string) => {
-    const confirmed = window.confirm("Apagar este estudo e todas as revisões vinculadas?");
-    if (!confirmed) return;
-
     setDeletingId(studyId);
     const toastId = toast.loading("Removendo estudo...");
 
@@ -179,6 +176,24 @@ export function StudyManager() {
     } finally {
       setDeletingId(null);
     }
+  };
+
+  const requestDelete = (studyId: string) => {
+    toast("Apagar este estudo e todas as revisões vinculadas?", {
+      duration: 10000,
+      cancel: {
+        label: "Cancelar",
+        onClick: () => {
+          toast.message("Exclusão cancelada.");
+        },
+      },
+      action: {
+        label: "Apagar",
+        onClick: () => {
+          void handleDelete(studyId);
+        },
+      },
+    });
   };
 
   return (
@@ -278,7 +293,7 @@ export function StudyManager() {
                         </Button>
                         <Button
                           className="h-10 rounded-full bg-rose-500 text-white hover:bg-rose-600"
-                          onClick={() => void handleDelete(study.id)}
+                          onClick={() => requestDelete(study.id)}
                           disabled={isDeleting}
                         >
                           {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}

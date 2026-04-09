@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/GlassCard";
 import { MemoraLogo } from "@/components/MemoraLogo";
 import { NavBar } from "@/components/NavBar";
+import { toast } from "sonner";
 
 type AuthGateProps = {
   children: ReactNode;
@@ -38,8 +39,9 @@ export function AuthGate({ children }: AuthGateProps) {
       process.env.NEXT_PUBLIC_SUPABASE_URL === "https://dummy.supabase.co";
 
     if (isConfigMissing) {
-      alert(
-        "Configure as credenciais do Supabase no arquivo .env (NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY) para testar o login."
+      toast.error(
+        "Configure as credenciais do Supabase no arquivo .env (NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY) para testar o login.",
+        { duration: 7000 }
       );
       return;
     }
