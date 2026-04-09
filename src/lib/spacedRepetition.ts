@@ -89,6 +89,21 @@ export async function getStudies() {
   return data as StudyRecord[];
 }
 
+export async function updateStudy(studyId: string, payload: { subject: string; topic: string }) {
+  const { data, error } = await supabase
+    .from("studies")
+    .update({
+      subject: payload.subject,
+      topic: payload.topic,
+    })
+    .eq("id", studyId)
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data as StudyRecord;
+}
+
 export async function getPendingRevisions(targetDateStr: string) {
   const { data, error } = await supabase
     .from("revisions")

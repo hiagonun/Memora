@@ -5,7 +5,7 @@ import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
 import { MemoraLogo } from "@/components/MemoraLogo";
-import { StudyForm } from "@/components/StudyForm";
+import { StudyManager } from "@/components/StudyManager";
 import { GlassCalendar } from "@/components/GlassCalendar";
 
 export default function Home() {
@@ -57,8 +57,8 @@ export default function Home() {
         </div>
 
         {activeTab === "studies" && (
-          <div className="mx-auto w-full max-w-md">
-            <StudyForm />
+          <div className="mx-auto w-full max-w-3xl">
+            <StudyManager />
           </div>
         )}
 

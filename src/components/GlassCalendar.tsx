@@ -41,12 +41,16 @@ export function GlassCalendar() {
   }, [loadMonthRevisions]);
 
   useEffect(() => {
-    const handleStudyCreated = () => {
+    const handleStudiesChange = () => {
       void loadMonthRevisions();
     };
 
-    window.addEventListener("memora:study-created", handleStudyCreated);
-    return () => window.removeEventListener("memora:study-created", handleStudyCreated);
+    window.addEventListener("memora:study-created", handleStudiesChange);
+    window.addEventListener("memora:studies-changed", handleStudiesChange);
+    return () => {
+      window.removeEventListener("memora:study-created", handleStudiesChange);
+      window.removeEventListener("memora:studies-changed", handleStudiesChange);
+    };
   }, [loadMonthRevisions]);
 
   // Lista dos dias na visualização do mês atual
