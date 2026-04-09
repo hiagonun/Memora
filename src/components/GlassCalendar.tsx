@@ -75,6 +75,7 @@ export function GlassCalendar() {
     setRevisions(prev => prev.map(r => r.id === revId ? { ...r, is_completed: !currentStatus } : r));
     try {
       await markRevisionCompleted(revId, !currentStatus);
+      window.dispatchEvent(new CustomEvent("memora:studies-changed"));
       toast.success(`Revisão marcada como ${dStr}!`);
     } catch {
       setRevisions(prev => prev.map(r => r.id === revId ? { ...r, is_completed: currentStatus } : r));
@@ -120,6 +121,7 @@ export function GlassCalendar() {
 
       await deleteStudy(studyId);
       setRevisions((prev) => prev.filter((r) => r.study_id !== studyId));
+      window.dispatchEvent(new CustomEvent("memora:studies-changed"));
       toast.success("Matéria removida com sucesso de todos os lugares!", { id: toastId });
     } catch (err) {
       console.error("Erro crítico ao apagar estudo:", err);

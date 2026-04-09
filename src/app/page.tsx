@@ -1,31 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
 import { MemoraLogo } from "@/components/MemoraLogo";
 import { StudyManager } from "@/components/StudyManager";
 import { GlassCalendar } from "@/components/GlassCalendar";
+import { getPendingRevisions } from "@/lib/spacedRepetition";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"studies" | "calendar">("studies");
+  const [todaySubjectsCount, setTodaySubjectsCount] = useState(0);
+
+  const loadTodayCount = useCallback(async () => {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+
+    try {
+      const pending = await getPendingRevisions(todayStr);
+      const uniqueStudyIds = new Set(pending.map((rev) => rev.study_id));
+      setTodaySubjectsCount(uniqueStudyIds.size);
+    } catch {
+      setTodaySubjectsCount(0);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab !== "calendar") return;
+    void loadTodayCount();
+  }, [activeTab, loadTodayCount]);
+
+  useEffect(() => {
+    const refresh = () => {
+      void loadTodayCount();
+    };
+
+    window.addEventListener("memora:study-created", refresh);
+    window.addEventListener("memora:studies-changed", refresh);
+
+    return () => {
+      window.removeEventListener("memora:study-created", refresh);
+      window.removeEventListener("memora:studies-changed", refresh);
+    };
+  }, [loadTodayCount]);
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center px-3 py-6 sm:px-5 sm:py-10 md:px-8">
       <div className="w-full space-y-8 sm:space-y-10 md:space-y-12">
         <header className="space-y-3 px-1 text-center sm:space-y-4">
-          <div className="flex flex-col items-center justify-center gap-2 pb-1 sm:flex-row sm:gap-3 sm:pb-2">
-            <MemoraLogo variant="hero" href={null} iconOnly />
-            <span className="bg-gradient-to-r from-sky-200 via-sky-100 to-cyan-200 bg-clip-text text-[clamp(1.75rem,5.5vw,2.75rem)] font-semibold tracking-tight text-transparent drop-shadow-[0_0_28px_rgba(125,211,252,0.35)]">
-              Memora
-            </span>
-          </div>
           <h1 className="text-[clamp(1.5rem,4.5vw,3rem)] font-light leading-tight tracking-tight text-sky-50">
             Bem-vindo
           </h1>
           <p className="mx-auto max-w-2xl text-pretty text-sm font-light leading-relaxed text-sky-100/75 sm:text-base md:text-lg">
-            Suas revisões espaçadas organizadas pela Curva do Esquecimento — clara, calma, no tom de vidro líquido.
+            Suas revisões espaçadas organizadas pela Curva do Esquecimento.
           </p>
         </header>
 
@@ -73,7 +104,9 @@ export default function Home() {
                 </div>
                 <div className="min-w-0 flex-1 sm:flex-initial">
                   <h3 className="text-base font-medium text-sky-50 sm:text-lg">Revisões de hoje</h3>
-                  <p className="text-sm text-sky-200/65">Você tem 3 matérias para revisar hoje.</p>
+                  <p className="text-sm text-sky-200/65">
+                    Você tem {todaySubjectsCount} {todaySubjectsCount === 1 ? "matéria" : "matérias"} para revisar hoje.
+                  </p>
                 </div>
               </div>
               <Button
