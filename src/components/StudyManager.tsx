@@ -12,7 +12,7 @@ import { supabase } from "@/lib/supabase/client";
 import { deleteGoogleCalendarEvent, updateGoogleCalendarEvent } from "@/lib/googleCalendar";
 
 const inputClass =
-  "w-full min-h-[42px] rounded-xl border border-sky-200/15 bg-sky-950/30 px-3 py-2 text-sm text-sky-50 outline-none transition-colors placeholder:text-sky-300/35 focus:border-sky-300/40 focus:ring-2 focus:ring-sky-400/35";
+  "w-full min-h-[42px] rounded-xl ring-1 ring-white/10 bg-black/20 px-3 py-2 text-sm text-white outline-none transition-all placeholder:text-zinc-500 hover:ring-white/20 focus:bg-black/40 focus:ring-2 focus:ring-sky-400/50";
 
 function formatDateLabel(dateStr: string) {
   const [yyyy, mm, dd] = dateStr.split("-");
@@ -208,24 +208,24 @@ export function StudyManager() {
     <div className="space-y-4 sm:space-y-5">
       <StudyForm />
 
-      <GlassCard className="p-4 sm:p-6">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <h2 className="text-base font-medium text-sky-50 sm:text-lg">Estudos cadastrados</h2>
-          <span className="rounded-full border border-sky-200/15 px-2.5 py-1 text-xs text-sky-200/75">
+      <GlassCard className="p-0 sm:p-2">
+        <div className="mb-2 flex items-center justify-between gap-3 px-5 pt-6 sm:px-6">
+          <h2 className="text-lg font-semibold text-white">Estudos vigentes</h2>
+          <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-zinc-300">
             {studies.length}
           </span>
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-8 text-sm text-sky-200/75">
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Carregando estudos...
+          <div className="flex items-center justify-center font-medium py-12 text-sm text-zinc-400">
+            <Loader2 className="mr-3 h-5 w-5 animate-spin text-white" /> Carregando base de dados...
           </div>
         ) : studies.length === 0 ? (
-          <p className="py-6 text-center text-sm text-sky-200/65">
-            Nenhum estudo cadastrado ainda.
+          <p className="py-12 text-center text-sm text-zinc-500">
+            O cronograma de revisões está vazio.
           </p>
         ) : (
-          <div className="space-y-2.5">
+          <div className="flex flex-col divide-y divide-white/5 px-2 mt-4 sm:px-4">
             {studies.map((study) => {
               const isEditing = editingId === study.id;
               const isSaving = savingId === study.id;
@@ -234,12 +234,12 @@ export function StudyManager() {
               return (
                 <div
                   key={study.id}
-                  className="rounded-2xl border border-sky-200/15 bg-sky-950/20 p-3 sm:p-4"
+                  className="py-5 sm:py-6 group transition-all"
                 >
                   {isEditing ? (
-                    <div className="space-y-3">
-                      <div className="space-y-1.5">
-                        <label className="ml-1 text-xs font-medium text-sky-200/75">Matéria</label>
+                    <div className="space-y-4 px-2 sm:px-4">
+                      <div className="space-y-2">
+                        <label className="ml-1 text-xs font-medium text-zinc-400 uppercase tracking-wider">Matéria</label>
                         <input
                           value={editSubject}
                           onChange={(e) => setEditSubject(e.target.value)}
@@ -248,8 +248,8 @@ export function StudyManager() {
                         />
                       </div>
 
-                      <div className="space-y-1.5">
-                        <label className="ml-1 text-xs font-medium text-sky-200/75">Assunto</label>
+                      <div className="space-y-2">
+                        <label className="ml-1 text-xs font-medium text-zinc-400 uppercase tracking-wider">Assunto</label>
                         <input
                           value={editTopic}
                           onChange={(e) => setEditTopic(e.target.value)}
@@ -258,54 +258,54 @@ export function StudyManager() {
                         />
                       </div>
 
-                      <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:justify-end pt-2">
                         <Button
                           variant="ghost"
-                          className="h-10 rounded-full border border-sky-200/15 text-sky-100 hover:bg-sky-400/10"
+                          className="h-10 rounded-full bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white"
                           onClick={cancelEdit}
                           disabled={isSaving}
                         >
-                          <X className="h-4 w-4" />
+                          <X className="mr-2 h-4 w-4" />
                           Cancelar
                         </Button>
                         <Button
-                          className="h-10 rounded-full bg-sky-400 text-sky-950 hover:bg-sky-300"
+                          className="h-10 rounded-full bg-white text-zinc-950 hover:bg-zinc-200"
                           onClick={() => void handleSave(study.id)}
                           disabled={isSaving}
                         >
-                          {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                          {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
                           Salvar
                         </Button>
                       </div>
                     </div>
                   ) : (
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-2 sm:px-4">
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-sky-50 sm:text-base">
+                        <p className="truncate text-base font-semibold text-white">
                           {study.subject}
                         </p>
-                        <p className="truncate text-sm text-sky-200/75">{study.topic}</p>
-                        <p className="mt-1 text-xs text-sky-300/60">
-                          Estudado em {formatDateLabel(study.study_date)}
+                        <p className="truncate text-sm text-zinc-400 mt-1">{study.topic}</p>
+                        <p className="mt-2 text-xs font-medium text-sky-400/80">
+                          Adicionado em {formatDateLabel(study.study_date)}
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
                         <Button
                           variant="ghost"
-                          className="h-10 rounded-full border border-sky-200/15 text-sky-100 hover:bg-sky-400/10"
+                          className="h-10 rounded-full bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white"
                           onClick={() => startEdit(study)}
                         >
                           <Pencil className="h-4 w-4" />
-                          Editar
+                          <span className="sr-only sm:not-sr-only sm:ml-2">Editar</span>
                         </Button>
                         <Button
-                          className="h-10 rounded-full bg-rose-500 text-white hover:bg-rose-600"
+                          className="h-10 rounded-full bg-rose-500/10 text-rose-500 hover:bg-rose-500/20"
                           onClick={() => requestDelete(study.id)}
                           disabled={isDeleting}
                         >
                           {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                          Apagar
+                          <span className="sr-only sm:not-sr-only sm:ml-2">Apagar</span>
                         </Button>
                       </div>
                     </div>

@@ -132,35 +132,35 @@ export default function Home() {
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center px-3 py-6 sm:px-5 sm:py-10 md:px-8">
       <div className="w-full space-y-8 sm:space-y-10 md:space-y-12">
         <header className="space-y-3 px-1 text-center sm:space-y-4">
-          <h1 className="text-[clamp(1.5rem,4.5vw,3rem)] font-light leading-tight tracking-tight text-sky-50">
-            Bem-vindo
+          <h1 className="text-[clamp(2.5rem,5vw,4rem)] font-semibold tracking-tighter text-white">
+            Dashboard
           </h1>
-          <p className="mx-auto max-w-2xl text-pretty text-sm font-light leading-relaxed text-sky-100/75 sm:text-base md:text-lg">
-            Suas revisões espaçadas organizadas pela Curva do Esquecimento.
+          <p className="mx-auto max-w-2xl text-pretty text-base leading-relaxed text-zinc-400">
+            Sua visão central. Acompanhe a saúde do seu cérebro e a próxima onda de revisões.
           </p>
         </header>
 
-        <div className="mx-auto flex w-full max-w-xl rounded-full border border-sky-200/15 bg-sky-950/30 p-1">
+        <div className="mx-auto flex w-full max-w-sm rounded-[2rem] bg-zinc-900/40 p-1 ring-1 ring-white/10 backdrop-blur-xl">
           <button
             type="button"
             onClick={() => setActiveTab("studies")}
             className={[
-              "h-11 flex-1 rounded-full text-sm font-medium transition-colors",
+              "h-12 flex-1 rounded-[1.75rem] text-sm font-medium transition-all duration-300",
               activeTab === "studies"
-                ? "bg-sky-400 text-sky-950"
-                : "text-sky-100 hover:bg-sky-400/15",
+                ? "bg-white text-zinc-950 shadow-sm"
+                : "text-zinc-400 hover:bg-white/5 hover:text-white",
             ].join(" ")}
           >
-            Gerenciar estudos
+            Estudos
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("calendar")}
             className={[
-              "h-11 flex-1 rounded-full text-sm font-medium transition-colors",
+              "h-12 flex-1 rounded-[1.75rem] text-sm font-medium transition-all duration-300",
               activeTab === "calendar"
-                ? "bg-sky-400 text-sky-950"
-                : "text-sky-100 hover:bg-sky-400/15",
+                ? "bg-white text-zinc-950 shadow-sm"
+                : "text-zinc-400 hover:bg-white/5 hover:text-white",
             ].join(" ")}
           >
             Calendário
@@ -174,18 +174,18 @@ export default function Home() {
         )}
 
         {activeTab === "calendar" && (
-          <div className="space-y-6">
+          <div className="mx-auto w-full max-w-4xl space-y-8">
             <GlassCalendar />
 
-            <GlassCard className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:gap-6 sm:p-6">
-              <div className="flex shrink-0 items-center gap-4 sm:gap-6">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-400/15 ring-1 ring-sky-300/25 sm:h-14 sm:w-14">
-                  <BookOpen className="h-6 w-6 text-sky-200 sm:h-7 sm:w-7" />
+            <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:gap-8 sm:p-8 rounded-[2.5rem] bg-zinc-900/40 ring-1 ring-white/10 backdrop-blur-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.05)]">
+              <div className="flex shrink-0 items-center gap-5">
+                <div className="flex h-14 w-14 items-center justify-center rounded-[1.5rem] bg-sky-500/10 ring-1 ring-sky-500/30">
+                  <BookOpen className="h-6 w-6 text-sky-400" />
                 </div>
                 <div className="min-w-0 flex-1 sm:flex-initial">
-                  <h3 className="text-base font-medium text-sky-50 sm:text-lg">Revisões de hoje</h3>
-                  <p className="text-sm text-sky-200/65">
-                    Você tem {todaySubjectsCount} {todaySubjectsCount === 1 ? "matéria" : "matérias"} para revisar hoje.
+                  <h3 className="text-lg font-semibold text-white">Revisões de hoje</h3>
+                  <p className="text-sm text-zinc-400 mt-1">
+                    Você tem <strong className="text-white font-semibold">{todaySubjectsCount}</strong> {todaySubjectsCount === 1 ? "matéria" : "matérias"} para revisar
                   </p>
                 </div>
               </div>
@@ -193,12 +193,17 @@ export default function Home() {
                 variant="outline"
                 onClick={() => void handleCompleteToday()}
                 disabled={todayPendingRevisions.length === 0 || isCompletingToday}
-                className="h-11 w-full shrink-0 rounded-full border-sky-300/25 bg-sky-400/10 text-sky-50 hover:bg-sky-400/20 sm:ml-auto sm:h-10 sm:w-auto sm:px-8"
+                className="group relative h-12 w-full shrink-0 overflow-hidden rounded-full border-0 bg-white px-8 text-sm font-medium text-zinc-950 hover:bg-zinc-200 transition-all active:scale-[0.98] sm:ml-auto sm:w-auto disabled:opacity-50 disabled:bg-white/10 disabled:text-white/50"
               >
-                {isCompletingToday && <Loader2 className="h-4 w-4 animate-spin" />}
-                {todayPendingRevisions.length === 0 ? "Tudo em dia" : "Concluir revisões"}
+                {isCompletingToday && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <span className="relative z-10 flex items-center gap-2">
+                  {todayPendingRevisions.length === 0 ? "Tudo em dia" : "Concluir revisões"}
+                </span>
+                {!isCompletingToday && todayPendingRevisions.length > 0 && (
+                  <div className="absolute inset-0 z-0 bg-gradient-to-r from-sky-400/0 via-sky-400/20 to-sky-400/0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                )}
               </Button>
-            </GlassCard>
+            </div>
           </div>
         )}
       </div>

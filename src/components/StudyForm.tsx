@@ -10,7 +10,7 @@ import { createGoogleCalendarEvent } from "@/lib/googleCalendar";
 import { toast } from "sonner";
 
 const inputClass =
-  "w-full min-h-[48px] rounded-2xl border border-sky-200/15 bg-sky-950/30 px-4 py-3 text-base text-sky-50 outline-none transition-colors placeholder:text-sky-300/35 focus:border-sky-300/40 focus:ring-2 focus:ring-sky-400/35 sm:min-h-[44px] sm:text-sm";
+  "w-full min-h-[48px] rounded-xl ring-1 ring-white/10 bg-black/20 px-4 py-3 text-base text-white outline-none transition-all placeholder:text-zinc-500 hover:ring-white/20 focus:bg-black/40 focus:ring-2 focus:ring-sky-400/50 sm:min-h-[44px] sm:text-sm";
 
 export function StudyForm() {
   const [isOpen, setIsOpen] = useState(false);
@@ -91,12 +91,12 @@ export function StudyForm() {
             }
           }}
         >
-          <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-sky-400/15 ring-1 ring-sky-300/25 sm:mb-6 sm:h-[4.5rem] sm:w-[4.5rem]">
-            <PlusCircle className="h-9 w-9 text-sky-200 sm:h-10 sm:w-10" strokeWidth={1.75} />
+          <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 ring-1 ring-white/10 sm:mb-6 sm:h-[4.5rem] sm:w-[4.5rem] transition-colors group-hover:bg-white/10">
+            <PlusCircle className="h-8 w-8 text-white sm:h-9 sm:w-9" strokeWidth={1.5} />
           </div>
-          <h2 className="mb-2 text-xl font-medium text-sky-50 sm:text-2xl">Novo estudo</h2>
-          <p className="max-w-xs text-pretty text-sm leading-relaxed text-sky-200/65 sm:text-base">
-            Registre uma matéria e calculamos as 5 revisões na curva do esquecimento.
+          <h2 className="mb-2 text-xl font-medium text-white sm:text-2xl">Novo estudo</h2>
+          <p className="max-w-sm text-pretty text-sm leading-relaxed text-zinc-400 sm:text-base">
+            Cadastre uma matéria e o algoritmo calculará as 5 próximas revisões exatas.
           </p>
         </GlassCard>
       )}
@@ -106,20 +106,22 @@ export function StudyForm() {
           <button
             type="button"
             onClick={() => setIsOpen(false)}
-            className="absolute right-3 top-3 flex h-11 w-11 touch-manipulation items-center justify-center rounded-full bg-sky-950/35 text-sky-100 transition-colors hover:bg-sky-400/20 sm:right-4 sm:top-4 sm:h-10 sm:w-10"
+            className="absolute right-4 top-4 flex h-10 w-10 touch-manipulation items-center justify-center rounded-full bg-white/5 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
             aria-label="Fechar"
           >
             ✕
           </button>
 
-          <h2 className="mb-6 flex items-center gap-2 pr-12 text-xl font-medium text-sky-50 sm:text-2xl">
-            <PlusCircle className="h-6 w-6 shrink-0 text-sky-300" strokeWidth={1.75} />
+          <h2 className="mb-8 flex items-center gap-3 pr-12 text-xl font-semibold text-white sm:text-2xl">
+            <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-white/5 ring-1 ring-white/10">
+              <PlusCircle className="h-5 w-5 text-white" strokeWidth={1.5} />
+            </div>
             Cadastrar estudo
           </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <label htmlFor="study-subject" className="ml-1 text-sm font-medium text-sky-200/80">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <label htmlFor="study-subject" className="ml-1 text-sm font-medium text-zinc-300">
                 Matéria
               </label>
               <input
@@ -134,8 +136,8 @@ export function StudyForm() {
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label htmlFor="study-topic" className="ml-1 text-sm font-medium text-sky-200/80">
+            <div className="space-y-2">
+              <label htmlFor="study-topic" className="ml-1 text-sm font-medium text-zinc-300">
                 Assunto
               </label>
               <input
@@ -150,8 +152,8 @@ export function StudyForm() {
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label htmlFor="study-date" className="ml-1 text-sm font-medium text-sky-200/80">
+            <div className="space-y-2">
+              <label htmlFor="study-date" className="ml-1 text-sm font-medium text-zinc-300">
                 Data do estudo
               </label>
               <input
@@ -164,14 +166,17 @@ export function StudyForm() {
               />
             </div>
 
-            <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:justify-end">
+            <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:justify-end">
               <Button
                 type="submit"
                 disabled={loading}
-                className="h-12 w-full rounded-full border-0 bg-sky-400 text-sky-950 transition-colors hover:bg-sky-300 sm:h-11 sm:w-auto sm:min-w-[10rem] sm:px-10"
+                className="group relative h-12 w-full rounded-full border-0 bg-white text-zinc-950 transition-all hover:bg-zinc-200 active:scale-[0.98] sm:h-11 sm:w-auto sm:min-w-[12rem] overflow-hidden"
               >
-                {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-                Criar rotina
+                <div className="absolute inset-0 bg-gradient-to-r from-sky-400/0 via-sky-400/10 to-sky-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <span className="relative z-10 flex items-center gap-2 font-medium">
+                  {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+                  Criar cronograma
+                </span>
               </Button>
             </div>
           </form>
