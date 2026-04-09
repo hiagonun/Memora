@@ -9,7 +9,6 @@ import { Button } from "./ui/button";
 import { getMonthRevisions, markRevisionCompleted, deleteStudy, RevisionRecord } from "@/lib/spacedRepetition";
 import { supabase } from "@/lib/supabase/client";
 import { deleteGoogleCalendarEvent } from "@/lib/googleCalendar";
-import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
 export function GlassCalendar() {
@@ -211,127 +210,112 @@ export function GlassCalendar() {
       </GlassCard>
 
       {/* Modal Diário */}
-      <AnimatePresence>
-        {selectedDateStr && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="mt-4 sm:mt-6"
-          >
-            <GlassCard className="relative p-4 sm:p-6">
-              <button
-                type="button"
-                onClick={() => setSelectedDateStr(null)}
-                className="absolute right-3 top-3 flex h-11 w-11 touch-manipulation items-center justify-center rounded-full bg-sky-950/30 text-sky-100 transition hover:bg-sky-400/20 sm:right-4 sm:top-4 sm:h-10 sm:w-10"
-                aria-label="Fechar"
-              >
-                ✕
-              </button>
+      {selectedDateStr && (
+        <div className="mt-4 sm:mt-6">
+          <GlassCard className="relative p-4 sm:p-6">
+            <button
+              type="button"
+              onClick={() => setSelectedDateStr(null)}
+              className="absolute right-3 top-3 flex h-11 w-11 touch-manipulation items-center justify-center rounded-full bg-sky-950/30 text-sky-100 transition-colors hover:bg-sky-400/20 sm:right-4 sm:top-4 sm:h-10 sm:w-10"
+              aria-label="Fechar"
+            >
+              ✕
+            </button>
 
-              <h3 className="mb-4 border-b border-sky-200/15 pb-4 pr-12 text-base font-medium text-sky-50 sm:text-lg">
-                Revisões —{" "}
-                {format(parseISO(selectedDateStr), "dd 'de' MMMM", { locale: ptBR })}
-              </h3>
+            <h3 className="mb-4 border-b border-sky-200/15 pb-4 pr-12 text-base font-medium text-sky-50 sm:text-lg">
+              Revisões - {format(parseISO(selectedDateStr), "dd 'de' MMMM", { locale: ptBR })}
+            </h3>
 
-              {selectedForSelectedDate.length === 0 ? (
-                <p className="py-6 text-center text-sm text-sky-200/60">
-                  Nenhuma revisão agendada para este dia.
-                </p>
-              ) : (
-                <div className="space-y-2 sm:space-y-3">
-                  {selectedForSelectedDate.map((rev) => (
-                    <div
-                      key={rev.id}
-                      className={[
-                        "flex items-center gap-2 rounded-2xl border p-2.5 transition sm:gap-3 sm:p-3",
-                        rev.is_completed
-                          ? "border-transparent bg-sky-950/25 opacity-70"
-                          : "border-sky-200/15 bg-sky-400/[0.07]",
-                      ].join(" ")}
+            {selectedForSelectedDate.length === 0 ? (
+              <p className="py-6 text-center text-sm text-sky-200/60">
+                Nenhuma revisão agendada para este dia.
+              </p>
+            ) : (
+              <div className="space-y-2 sm:space-y-3">
+                {selectedForSelectedDate.map((rev) => (
+                  <div
+                    key={rev.id}
+                    className={[
+                      "flex items-center gap-2 rounded-2xl border p-2.5 transition-colors sm:gap-3 sm:p-3",
+                      rev.is_completed
+                        ? "border-transparent bg-sky-950/25 opacity-70"
+                        : "border-sky-200/15 bg-sky-400/[0.07]",
+                    ].join(" ")}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => toggleCheck(rev.id, rev.is_completed)}
+                      className="flex h-11 w-11 shrink-0 touch-manipulation items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50 sm:h-10 sm:w-10"
+                      aria-label={rev.is_completed ? "Marcar como pendente" : "Marcar como concluída"}
                     >
-                      <button
-                        type="button"
-                        onClick={() => toggleCheck(rev.id, rev.is_completed)}
-                        className="flex h-11 w-11 shrink-0 touch-manipulation items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50 sm:h-10 sm:w-10"
-                        aria-label={rev.is_completed ? "Marcar como pendente" : "Marcar como concluída"}
+                      {rev.is_completed ? (
+                        <CheckCircle2 className="h-6 w-6 text-emerald-400" />
+                      ) : (
+                        <Circle className="h-6 w-6 text-sky-300/50" />
+                      )}
+                    </button>
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className={`text-sm font-medium leading-snug sm:text-base ${rev.is_completed ? "text-sky-300/50 line-through" : "text-sky-50"}`}
                       >
-                        {rev.is_completed ? (
-                          <CheckCircle2 className="h-6 w-6 text-emerald-400" />
-                        ) : (
-                          <Circle className="h-6 w-6 text-sky-300/50" />
-                        )}
-                      </button>
-                      <div className="min-w-0 flex-1">
-                        <p
-                          className={`text-sm font-medium leading-snug sm:text-base ${rev.is_completed ? "text-sky-300/50 line-through" : "text-sky-50"}`}
-                        >
-                          {rev.study?.subject} — {rev.study?.topic}
-                        </p>
-                        <p className="text-xs text-sky-200/55">
-                          Curva do esquecimento · R{rev.revision_number}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (rev.study_id) setDeletingStudyId(rev.study_id);
-                        }}
-                        className="flex h-11 w-11 shrink-0 touch-manipulation items-center justify-center rounded-full text-rose-400/90 transition-colors hover:bg-rose-500/15 hover:text-rose-300"
-                        title="Apagar matéria"
-                      >
-                        <Trash2 className="h-5 w-5" />
-                      </button>
+                        {rev.study?.subject} - {rev.study?.topic}
+                      </p>
+                      <p className="text-xs text-sky-200/55">
+                        Curva do esquecimento · R{rev.revision_number}
+                      </p>
                     </div>
-                  ))}
-                </div>
-              )}
-            </GlassCard>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (rev.study_id) setDeletingStudyId(rev.study_id);
+                      }}
+                      className="flex h-11 w-11 shrink-0 touch-manipulation items-center justify-center rounded-full text-rose-400/90 transition-colors hover:bg-rose-500/15 hover:text-rose-300"
+                      title="Apagar matéria"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </GlassCard>
+        </div>
+      )}
 
       {/* Confirmação de Exclusão Customizada (Glass Modal) */}
-      <AnimatePresence>
-        {deletingStudyId && (
-          <div className="fixed inset-0 z-[100] flex items-end justify-center bg-sky-950/40 p-3 backdrop-blur-md sm:items-center sm:p-4">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="w-full max-w-sm pb-[env(safe-area-inset-bottom,0px)] sm:pb-0"
-            >
-              <GlassCard className="border-sky-200/20 p-6 text-center shadow-2xl sm:p-8">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-rose-500/15 ring-1 ring-rose-400/25">
-                  <Trash2 className="h-8 w-8 text-rose-400" />
-                </div>
-                <h3 className="mb-2 text-lg font-medium text-sky-50 sm:text-xl">Apagar estudo?</h3>
-                <p className="mb-6 text-sm leading-relaxed text-sky-200/65">
-                  Remove a matéria no Memora e os eventos ligados no Google Calendar.
-                </p>
-                <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
-                  <Button
-                    variant="ghost"
-                    className="h-11 w-full rounded-full border border-sky-200/15 text-sky-100 hover:bg-sky-400/10 sm:flex-1"
-                    onClick={() => setDeletingStudyId(null)}
-                    disabled={isDeleting}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    className="h-11 w-full rounded-full border-0 bg-rose-500 text-white shadow-lg shadow-rose-600/25 hover:bg-rose-600 sm:flex-1"
-                    onClick={handleDeleteStudy}
-                    disabled={isDeleting}
-                  >
-                    {isDeleting ? "Apagando…" : "Apagar"}
-                  </Button>
-                </div>
-              </GlassCard>
-            </motion.div>
+      {deletingStudyId && (
+        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-sky-950/40 p-3 sm:items-center sm:p-4">
+          <div className="w-full max-w-sm pb-[env(safe-area-inset-bottom,0px)] sm:pb-0">
+            <GlassCard className="border-sky-200/20 p-6 text-center sm:p-8">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-rose-500/15 ring-1 ring-rose-400/25">
+                <Trash2 className="h-8 w-8 text-rose-400" />
+              </div>
+              <h3 className="mb-2 text-lg font-medium text-sky-50 sm:text-xl">Apagar estudo?</h3>
+              <p className="mb-6 text-sm leading-relaxed text-sky-200/65">
+                Remove a matéria no Memora e os eventos ligados no Google Calendar.
+              </p>
+              <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
+                <Button
+                  variant="ghost"
+                  className="h-11 w-full rounded-full border border-sky-200/15 text-sky-100 hover:bg-sky-400/10 sm:flex-1"
+                  onClick={() => setDeletingStudyId(null)}
+                  disabled={isDeleting}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  className="h-11 w-full rounded-full border-0 bg-rose-500 text-white transition-colors hover:bg-rose-600 sm:flex-1"
+                  onClick={handleDeleteStudy}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? "Apagando..." : "Apagar"}
+                </Button>
+              </div>
+            </GlassCard>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 }

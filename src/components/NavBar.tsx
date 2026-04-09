@@ -4,7 +4,7 @@ import { MemoraLogo } from "./MemoraLogo";
 
 export function NavBar() {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-sky-200/15 bg-[oklch(0.1_0.04_250/0.72)] px-4 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.45)] backdrop-blur-2xl backdrop-saturate-150 sm:px-6 sm:pb-3.5">
+    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-sky-200/15 bg-[oklch(0.1_0.04_250/0.92)] px-4 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] shadow-[0_4px_14px_-8px_rgba(0,0,0,0.65)] sm:px-6 sm:pb-3.5">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
         <Link
           href="/"

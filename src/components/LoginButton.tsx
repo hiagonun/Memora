@@ -89,7 +89,7 @@ export function LoginButton() {
   return (
     <Button
       onClick={handleLogin}
-      className="h-11 touch-manipulation rounded-full border border-sky-200/25 bg-sky-400/15 px-4 text-sm font-medium text-sky-50 shadow-[0_4px_20px_-8px_rgba(56,189,248,0.4)] backdrop-blur-md transition hover:bg-sky-400/25 sm:h-10 sm:px-5"
+      className="h-11 touch-manipulation rounded-full border border-sky-200/25 bg-sky-400/15 px-4 text-sm font-medium text-sky-50 transition-colors hover:bg-sky-400/25 sm:h-10 sm:px-5"
     >
       Entrar com Google
     </Button>
