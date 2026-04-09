@@ -48,3 +48,31 @@ export async function createGoogleCalendarEvent(
 
   return response.json();
 }
+
+export async function deleteGoogleCalendarEvent(providerToken: string, eventId: string) {
+  const encodedId = encodeURIComponent(eventId);
+  const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events/${encodedId}`;
+
+  const response = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${providerToken}`,
+    },
+  });
+
+  if (response.status === 404 || response.status === 410) {
+    return;
+  }
+
+  if (!response.ok) {
+    const text = await response.text();
+    let message = text;
+    try {
+      const err = JSON.parse(text) as { error?: { message?: string } };
+      message = err.error?.message ?? text;
+    } catch {
+      /* use raw text */
+    }
+    throw new Error(message || "Falha ao deletar no Google Calendar");
+  }
+}

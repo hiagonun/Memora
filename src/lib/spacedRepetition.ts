@@ -15,6 +15,7 @@ export type RevisionRecord = {
   revision_date: string;
   revision_number: number;
   is_completed: boolean;
+  calendar_event_id?: string | null;
   study?: StudyRecord;
 };
 
@@ -66,15 +67,16 @@ export async function createStudy(subject: string, topic: string, studyDateStrin
   }));
 
   // 3. Inserir Registros de Revisão (Revisions)
-  const { error: revError } = await supabase
+  const { data: insertedRevisions, error: revError } = await supabase
     .from("revisions")
-    .insert(revisionsToInsert);
+    .insert(revisionsToInsert)
+    .select();
   
   if (revError) {
     throw new Error("Erro ao criar as datas de revisão: " + revError.message);
   }
 
-  return { study, revisions: revisionsToInsert };
+  return { study, revisions: insertedRevisions as RevisionRecord[] };
 }
 
 export async function getStudies() {
@@ -123,6 +125,25 @@ export async function markRevisionCompleted(revisionId: string, completed: boole
     .from("revisions")
     .update({ is_completed: completed })
     .eq("id", revisionId);
+    
+  if (error) throw new Error(error.message);
+}
+
+export async function updateRevisionEventId(revisionId: string, eventId: string) {
+  const { error } = await supabase
+    .from("revisions")
+    .update({ calendar_event_id: eventId })
+    .eq("id", revisionId);
+    
+  if (error) console.error("Error updating revision event ID:", error.message);
+}
+
+export async function deleteStudy(studyId: string) {
+  // Cascara exclui revisões automaticamente devido à restrição ON DELETE CASCADE do PostgreSQL
+  const { error } = await supabase
+    .from("studies")
+    .delete()
+    .eq("id", studyId);
     
   if (error) throw new Error(error.message);
 }
