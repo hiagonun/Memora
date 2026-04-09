@@ -1,5 +1,7 @@
 import { Hero } from "@/components/marketing/Hero";
 import { BentoGrid } from "@/components/marketing/BentoGrid";
+import { ForgettingCurve } from "@/components/marketing/ForgettingCurve";
+import { Testimonials } from "@/components/marketing/Testimonials";
 import { MemoraLogo } from "@/components/MemoraLogo";
 
 export default function MarketingPage() {
@@ -7,6 +9,8 @@ export default function MarketingPage() {
     <div className="flex flex-col items-center w-full">
       <Hero />
       <BentoGrid />
+      <ForgettingCurve />
+      <Testimonials />
       
       {/* Premium Dark Footer */}
       <footer className="w-full border-t border-white/10 bg-zinc-950/50 backdrop-blur-md py-16">
