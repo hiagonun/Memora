@@ -6,6 +6,8 @@ import { Button } from "./ui/button";
 import { PlusCircle, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createStudy } from "@/lib/spacedRepetition";
+import { supabase } from "@/lib/supabase/client";
+import { createGoogleCalendarEvent } from "@/lib/googleCalendar";
 
 export function StudyForm() {
   const [isOpen, setIsOpen] = useState(false);
@@ -35,7 +37,26 @@ export function StudyForm() {
       if (!subject || !topic || !studyDate) {
         throw new Error("Preencha todos os campos.");
       }
-      await createStudy(subject, topic, studyDate);
+      
+      const { revisions } = await createStudy(subject, topic, studyDate);
+      
+      // Integrar com Google Calendar
+      const { data: { session } } = await supabase.auth.getSession();
+      const providerToken = session?.provider_token;
+      
+      if (providerToken) {
+        setSuccessMsg("Salvando no Google Calendar...");
+        for (const rev of revisions) {
+          await createGoogleCalendarEvent(providerToken, {
+            summary: `Revisão R${rev.revision_number} - ${subject}`,
+            description: `Revisão do assunto: ${topic}. Curva do Esquecimento.`,
+            startDate: rev.revision_date,
+          });
+        }
+      } else {
+        console.warn("Token OAuth não encontrado. Os eventos não foram pro Calendar.");
+      }
+
       setSuccessMsg("Estudo cadastrado! Suas revisões foram agendadas.");
       setSubject("");
       setTopic("");

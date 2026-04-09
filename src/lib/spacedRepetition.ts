@@ -71,11 +71,10 @@ export async function createStudy(subject: string, topic: string, studyDateStrin
     .insert(revisionsToInsert);
   
   if (revError) {
-    // Ideally we would rollback the standard study insert here if Supabase doesn't have RPC
     throw new Error("Erro ao criar as datas de revisão: " + revError.message);
   }
 
-  return study;
+  return { study, revisions: revisionsToInsert };
 }
 
 export async function getStudies() {
