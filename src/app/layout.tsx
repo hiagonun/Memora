@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { AuthGate } from "@/components/AuthGate";
+
 
 const inter = Inter({
   variable: "--font-sans",
@@ -30,9 +30,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${inter.variable} dark h-full antialiased`} suppressHydrationWarning>
+    <html lang="pt-BR" className={`${inter.variable} h-full antialiased`} suppressHydrationWarning>
       <body className="min-h-full min-h-[100dvh] flex flex-col relative font-sans text-foreground bg-background placeholder:text-muted-foreground pb-[env(safe-area-inset-bottom,0px)] selection:bg-sky-400/30 selection:text-sky-50" suppressHydrationWarning>
-        <AuthGate>{children}</AuthGate>
+        {children}
         <Toaster richColors closeButton />
       </body>
     </html>

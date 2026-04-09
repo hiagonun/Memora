@@ -50,7 +50,7 @@ export function AuthGate({ children }: AuthGateProps) {
       provider: "google",
       options: {
         scopes: "https://www.googleapis.com/auth/calendar.events",
-        redirectTo: typeof window !== "undefined" ? `${window.location.origin}/` : "/",
+        redirectTo: typeof window !== "undefined" ? `${window.location.origin}/dashboard` : "/dashboard",
       },
     });
   };
