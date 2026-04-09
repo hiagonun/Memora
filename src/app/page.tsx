@@ -1,6 +1,7 @@
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
+import { MemoraLogo } from "@/components/MemoraLogo";
 import { StudyForm } from "@/components/StudyForm";
 import { GlassCalendar } from "@/components/GlassCalendar";
 
@@ -9,11 +10,14 @@ export default function Home() {
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center px-3 py-6 sm:px-5 sm:py-10 md:px-8">
       <div className="w-full space-y-8 sm:space-y-10 md:space-y-12">
         <header className="space-y-3 px-1 text-center sm:space-y-4">
-          <h1 className="text-[clamp(1.75rem,5.5vw,3.5rem)] font-light leading-tight tracking-tight text-sky-50">
-            Bem-vindo ao{" "}
-            <span className="bg-gradient-to-r from-sky-200 via-sky-100 to-cyan-200 bg-clip-text font-semibold text-transparent drop-shadow-[0_0_28px_rgba(125,211,252,0.35)]">
+          <div className="flex flex-col items-center justify-center gap-2 pb-1 sm:flex-row sm:gap-3 sm:pb-2">
+            <MemoraLogo variant="hero" href={null} iconOnly />
+            <span className="bg-gradient-to-r from-sky-200 via-sky-100 to-cyan-200 bg-clip-text text-[clamp(1.75rem,5.5vw,2.75rem)] font-semibold tracking-tight text-transparent drop-shadow-[0_0_28px_rgba(125,211,252,0.35)]">
               Memora
             </span>
+          </div>
+          <h1 className="text-[clamp(1.5rem,4.5vw,3rem)] font-light leading-tight tracking-tight text-sky-50">
+            Bem-vindo
           </h1>
           <p className="mx-auto max-w-2xl text-pretty text-sm font-light leading-relaxed text-sky-100/75 sm:text-base md:text-lg">
             Suas revisões espaçadas organizadas pela Curva do Esquecimento — clara, calma, no tom de vidro líquido.
