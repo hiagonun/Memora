@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, Loader2, Link as LinkIcon, FileIcon, CheckCircle2 } from "lucide-react";
 import { StudyManager } from "@/components/StudyManager";
 import { GlassCalendar } from "@/components/GlassCalendar";
+import { PomodoroGlass } from "@/components/PomodoroGlass";
+import { ConsistencyHeatmap } from "@/components/ConsistencyHeatmap";
+import { OverloadChart } from "@/components/OverloadChart";
 import { getPendingRevisions, markRevisionCompleted, type RevisionRecord } from "@/lib/spacedRepetition";
 import { updateGoogleCalendarEvent } from "@/lib/googleCalendar";
 import { supabase } from "@/lib/supabase/client";
@@ -13,7 +16,7 @@ import { toast } from "sonner";
 import Swal from "sweetalert2";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<"today" | "studies" | "calendar">("today");
+  const [activeTab, setActiveTab] = useState<"today" | "studies" | "calendar" | "stats">("today");
   const [todaySubjectsCount, setTodaySubjectsCount] = useState(0);
   const [todayPendingRevisions, setTodayPendingRevisions] = useState<RevisionRecord[]>([]);
   const [loadingActionId, setLoadingActionId] = useState<string | null>(null);
@@ -130,7 +133,7 @@ export default function Home() {
           </p>
         </header>
 
-        <div className="mx-auto flex w-full max-w-lg rounded-[2rem] bg-zinc-900/40 p-1 ring-1 ring-white/10 backdrop-blur-xl">
+        <div className="mx-auto flex w-full max-w-2xl rounded-[2rem] bg-zinc-900/40 p-1 ring-1 ring-white/10 backdrop-blur-xl">
           <button
             type="button"
             onClick={() => setActiveTab("today")}
@@ -166,6 +169,18 @@ export default function Home() {
             ].join(" ")}
           >
             Calendário
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("stats")}
+            className={[
+              "h-12 flex-1 rounded-[1.75rem] text-sm font-medium transition-all duration-300",
+              activeTab === "stats"
+                ? "bg-white text-zinc-950 shadow-sm"
+                : "text-zinc-400 hover:bg-white/5 hover:text-white",
+            ].join(" ")}
+          >
+            Estatísticas
           </button>
         </div>
 
@@ -265,7 +280,15 @@ export default function Home() {
             <GlassCalendar />
           </div>
         )}
+
+        {activeTab === "stats" && (
+          <div className="mx-auto w-full max-w-4xl space-y-8 animate-in fade-in duration-500">
+            <ConsistencyHeatmap />
+            <OverloadChart />
+          </div>
+        )}
       </div>
+      <PomodoroGlass />
     </main>
   );
 }

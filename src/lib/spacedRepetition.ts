@@ -22,6 +22,7 @@ export type RevisionRecord = {
   revision_date: string;
   revision_number: number;
   is_completed: boolean;
+  completed_at?: string | null;
   calendar_event_id?: string | null;
   study?: StudyRecord;
 };
@@ -151,7 +152,10 @@ export async function getMonthRevisions(startDateStr: string, endDateStr: string
 export async function markRevisionCompleted(revisionId: string, completed: boolean = true) {
   const { error } = await supabase
     .from("revisions")
-    .update({ is_completed: completed })
+    .update({ 
+      is_completed: completed,
+      completed_at: completed ? new Date().toISOString() : null
+    })
     .eq("id", revisionId);
     
   if (error) throw new Error(error.message);
