@@ -1,5 +1,11 @@
 import { supabase } from "@/lib/supabase/client";
 
+export type StudyAttachment = {
+  type: "link" | "file";
+  url: string;
+  name: string;
+};
+
 export type StudyRecord = {
   id: string;
   user_id: string;
@@ -7,6 +13,7 @@ export type StudyRecord = {
   topic: string;
   study_date: string;
   created_at: string;
+  attachments?: StudyAttachment[] | null;
 };
 
 export type RevisionRecord = {
@@ -35,7 +42,7 @@ function addDaysToDateString(dateString: string, days: number): string {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-export async function createStudy(subject: string, topic: string, studyDateString: string) {
+export async function createStudy(subject: string, topic: string, studyDateString: string, attachments: StudyAttachment[] = []) {
   const { data: userData, error: userError } = await supabase.auth.getUser();
   
   if (userError || !userData?.user) {
@@ -51,6 +58,7 @@ export async function createStudy(subject: string, topic: string, studyDateStrin
         subject,
         topic,
         study_date: studyDateString,
+        attachments,
       },
     ])
     .select()
@@ -89,13 +97,18 @@ export async function getStudies() {
   return data as StudyRecord[];
 }
 
-export async function updateStudy(studyId: string, payload: { subject: string; topic: string }) {
+export async function updateStudy(studyId: string, payload: { subject: string; topic: string; attachments?: StudyAttachment[] }) {
+  const updateData: any = {
+    subject: payload.subject,
+    topic: payload.topic,
+  };
+  if (payload.attachments) {
+    updateData.attachments = payload.attachments;
+  }
+
   const { data, error } = await supabase
     .from("studies")
-    .update({
-      subject: payload.subject,
-      topic: payload.topic,
-    })
+    .update(updateData)
     .eq("id", studyId)
     .select()
     .single();

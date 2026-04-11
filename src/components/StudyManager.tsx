@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Pencil, Trash2, Check, X, Loader2 } from "lucide-react";
+import { Pencil, Trash2, Check, X, Loader2, Link as LinkIcon, FileIcon } from "lucide-react";
 import { toast } from "sonner";
 import Swal from "sweetalert2";
 import { StudyForm } from "@/components/StudyForm";
@@ -285,6 +285,22 @@ export function StudyManager() {
                           {study.subject}
                         </p>
                         <p className="truncate text-sm text-zinc-400 mt-1">{study.topic}</p>
+                        {study.attachments && study.attachments.length > 0 && (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {study.attachments.map((att: any, i: number) => (
+                              <a
+                                key={i}
+                                href={att.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 rounded-md bg-white/5 px-2 py-1 text-xs font-medium text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
+                              >
+                                {att.type === 'link' ? <LinkIcon className="h-3 w-3 text-sky-400" /> : <FileIcon className="h-3 w-3 text-emerald-400" />}
+                                <span className="truncate max-w-[150px]">{att.name}</span>
+                              </a>
+                            ))}
+                          </div>
+                        )}
                         <p className="mt-2 text-xs font-medium text-sky-400/80">
                           Adicionado em {formatDateLabel(study.study_date)}
                         </p>

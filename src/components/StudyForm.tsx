@@ -1,16 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { GlassCard } from "./GlassCard";
 import { Button } from "./ui/button";
-import { PlusCircle, Loader2 } from "lucide-react";
-import { createStudy } from "@/lib/spacedRepetition";
+import { PlusCircle, Loader2, Link as LinkIcon, Paperclip, Trash2, File as FileIcon } from "lucide-react";
+import { createStudy, StudyAttachment } from "@/lib/spacedRepetition";
 import { supabase } from "@/lib/supabase/client";
 import { createGoogleCalendarEvent } from "@/lib/googleCalendar";
 import { toast } from "sonner";
 
 const inputClass =
   "w-full min-h-[48px] rounded-xl ring-1 ring-white/10 bg-black/20 px-4 py-3 text-base text-white outline-none transition-all placeholder:text-zinc-500 hover:ring-white/20 focus:bg-black/40 focus:ring-2 focus:ring-sky-400/50 sm:min-h-[44px] sm:text-sm";
+
+type FormAttachment = { id: string; type: "link" | "file"; url: string; name: string; file?: File; };
 
 export function StudyForm() {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,8 +26,41 @@ export function StudyForm() {
     const dd = String(today.getDate()).padStart(2, "0");
     return `${yyyy}-${mm}-${dd}`;
   });
+  const [studyTime, setStudyTime] = useState("");
+
+  const [attachments, setAttachments] = useState<FormAttachment[]>([]);
+  const [linkUrl, setLinkUrl] = useState("");
+  const [linkName, setLinkName] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(false);
+
+  const handleAddLink = () => {
+    if (!linkUrl) return;
+    setAttachments((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), type: "link", url: linkUrl, name: linkName || linkUrl },
+    ]);
+    setLinkUrl("");
+    setLinkName("");
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length) return;
+    const files = Array.from(e.target.files);
+    const newAtts = files.map(file => ({
+      id: crypto.randomUUID(),
+      type: "file" as const,
+      url: "",
+      name: file.name,
+      file,
+    }));
+    setAttachments((prev) => [...prev, ...newAtts]);
+  };
+
+  const handleRemoveAttachment = (id: string) => {
+    setAttachments((prev) => prev.filter(a => a.id !== id));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,12 +71,30 @@ export function StudyForm() {
         throw new Error("Preencha todos os campos.");
       }
 
-      const { revisions } = await createStudy(subject, topic, studyDate);
-
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
       const providerToken = session?.provider_token;
+
+      let finalAttachments: StudyAttachment[] = [];
+      if (attachments.length > 0 && userId) {
+        toast.info("Enviando anexos...");
+        for (const att of attachments) {
+          if (att.type === "file" && att.file) {
+            const filePath = `${userId}/${Date.now()}_${att.file.name}`;
+            const { data, error } = await supabase.storage.from("study-materials").upload(filePath, att.file);
+            if (!error) {
+              const { data: { publicUrl } } = supabase.storage.from("study-materials").getPublicUrl(filePath);
+              finalAttachments.push({ type: "file", url: publicUrl, name: att.name });
+            } else {
+              toast.error(`Falha ao subir ${att.name}`);
+            }
+          } else if (att.type === "link") {
+            finalAttachments.push({ type: "link", url: att.url, name: att.name });
+          }
+        }
+      }
+
+      const { revisions } = await createStudy(subject, topic, studyDate, finalAttachments);
 
       if (providerToken) {
         toast.info("Agendando revisões no Google Calendar...");
@@ -50,6 +103,7 @@ export function StudyForm() {
             summary: `Revisão R${rev.revision_number} - ${subject}`,
             description: `Revisão do assunto: ${topic}. Curva do Esquecimento.`,
             startDate: rev.revision_date,
+            ...(studyTime && { startTime: studyTime })
           });
 
           if (gEvent?.id) {
@@ -67,6 +121,8 @@ export function StudyForm() {
       }
       setSubject("");
       setTopic("");
+      setStudyTime("");
+      setAttachments([]);
       setIsOpen(false);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Erro ao cadastrar.";
@@ -152,18 +208,97 @@ export function StudyForm() {
               />
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="study-date" className="ml-1 text-sm font-medium text-zinc-300">
-                Data do estudo
-              </label>
-              <input
-                id="study-date"
-                type="date"
-                value={studyDate}
-                onChange={(e) => setStudyDate(e.target.value)}
-                className={inputClass}
-                required
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label htmlFor="study-date" className="ml-1 text-sm font-medium text-zinc-300">
+                  Data do estudo
+                </label>
+                <input
+                  id="study-date"
+                  type="date"
+                  value={studyDate}
+                  onChange={(e) => setStudyDate(e.target.value)}
+                  className={inputClass}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="study-time" className="ml-1 text-sm font-medium text-zinc-300">
+                  Horário (Opcional)
+                </label>
+                <input
+                  id="study-time"
+                  type="time"
+                  value={studyTime}
+                  onChange={(e) => setStudyTime(e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2 pt-2">
+              <label className="ml-1 text-sm font-medium text-zinc-300">Anexos e Links</label>
+              <div className="rounded-xl border border-white/10 bg-black/20 p-4 space-y-4">
+                
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 grid grid-cols-2 gap-2">
+                    <input
+                      type="url"
+                      placeholder="URL do link"
+                      value={linkUrl}
+                      onChange={(e) => setLinkUrl(e.target.value)}
+                      className={inputClass}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Nome do link (opcional)"
+                      value={linkName}
+                      onChange={(e) => setLinkName(e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+                  <Button type="button" onClick={handleAddLink} variant="ghost" className="h-[42px] px-3 bg-white/5 text-white hover:bg-white/10">
+                    Adicionar
+                  </Button>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-zinc-400">Ou selecione arquivos (PDF, etc)</span>
+                  <input 
+                    type="file" 
+                    multiple 
+                    ref={fileInputRef} 
+                    onChange={handleFileSelect} 
+                    className="hidden" 
+                  />
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="h-[42px] px-3 bg-white/5 text-white hover:bg-white/10"
+                  >
+                    <Paperclip className="h-4 w-4 mr-2" />
+                    Selecionar Arquivos
+                  </Button>
+                </div>
+
+                {attachments.length > 0 && (
+                  <ul className="mt-4 space-y-2 pt-4 border-t border-white/10">
+                    {attachments.map(att => (
+                      <li key={att.id} className="flex justify-between items-center bg-white/5 px-3 py-2 rounded-lg">
+                        <div className="flex items-center space-x-3 overflow-hidden text-sm">
+                          {att.type === "link" ? <LinkIcon className="h-4 w-4 text-sky-400 flex-shrink-0" /> : <FileIcon className="h-4 w-4 text-emerald-400 flex-shrink-0" />}
+                          <span className="truncate max-w-[200px] sm:max-w-xs">{att.name}</span>
+                        </div>
+                        <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveAttachment(att.id)} className="h-8 w-8 text-rose-500 hover:bg-rose-500/20 rounded-full">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             </div>
 
             <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:justify-end">

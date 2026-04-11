@@ -6,28 +6,38 @@ export async function createGoogleCalendarEvent(
     summary: string;
     description: string;
     startDate: string; // YYYY-MM-DD
+    startTime?: string; // HH:MM
   }
 ) {
   const url = "https://www.googleapis.com/calendar/v3/calendars/primary/events";
   
-  // Eventos de dia inteiro no Google exigem que a data 'end' seja o dia seguinte ao início
-  const dStart = parseISO(event.startDate);
-  const dEnd = addDays(dStart, 1);
-  const endString = format(dEnd, "yyyy-MM-dd");
+  let start, end;
+
+  if (event.startTime) {
+    const dStart = new Date(`${event.startDate}T${event.startTime}:00`);
+    const dEnd = new Date(dStart.getTime() + 60 * 60 * 1000); // 1 hora de duração
+    
+    start = { dateTime: dStart.toISOString() };
+    end = { dateTime: dEnd.toISOString() };
+  } else {
+    // Eventos de dia inteiro no Google exigem que a data 'end' seja o dia seguinte ao início
+    const dStart = parseISO(event.startDate);
+    const dEnd = addDays(dStart, 1);
+    const endString = format(dEnd, "yyyy-MM-dd");
+
+    start = { date: event.startDate };
+    end = { date: endString };
+  }
 
   const body = {
     summary: event.summary,
     description: event.description,
-    start: {
-      date: event.startDate,
-    },
-    end: {
-      date: endString,
-    },
+    start,
+    end,
     reminders: {
       useDefault: false,
       overrides: [
-        { method: "popup", minutes: 60 * 9 }, // push notification 9h da manhã do proprio dia
+        { method: "popup", minutes: event.startTime ? 30 : 60 * 9 }, 
       ],
     }
   };
