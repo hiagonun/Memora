@@ -14,10 +14,23 @@ export async function createGoogleCalendarEvent(
   let start, end;
 
   if (event.startTime) {
-    const dStart = new Date(`${event.startDate}T${event.startTime}:00`);
+    // Constrói a datetime com o offset do fuso local para evitar interpretação UTC.
+    // Ex: "2024-04-13T20:00:00-03:00" em vez de "2024-04-13T20:00:00Z"
+    const localOffset = (() => {
+      const d = new Date();
+      const offsetMin = -d.getTimezoneOffset(); // getTimezoneOffset retorna o inverso
+      const sign = offsetMin >= 0 ? "+" : "-";
+      const abs = Math.abs(offsetMin);
+      const hh = String(Math.floor(abs / 60)).padStart(2, "0");
+      const mm = String(abs % 60).padStart(2, "0");
+      return `${sign}${hh}:${mm}`;
+    })();
+
+    const startISO = `${event.startDate}T${event.startTime}:00${localOffset}`;
+    const dStart = new Date(startISO);
     const dEnd = new Date(dStart.getTime() + 60 * 60 * 1000); // 1 hora de duração
-    
-    start = { dateTime: dStart.toISOString() };
+
+    start = { dateTime: startISO };
     end = { dateTime: dEnd.toISOString() };
   } else {
     // Eventos de dia inteiro no Google exigem que a data 'end' seja o dia seguinte ao início
