@@ -99,11 +99,12 @@ export function StudyForm() {
       if (providerToken) {
         toast.info("Agendando revisões no Google Calendar...");
         for (const rev of revisions) {
-          const gEvent = await createGoogleCalendarEvent(providerToken, {
+        const gEvent = await createGoogleCalendarEvent(providerToken, {
             summary: `Revisão R${rev.revision_number} - ${subject}`,
             description: `Revisão do assunto: ${topic}. Curva do Esquecimento.`,
             startDate: rev.revision_date,
-            ...(studyTime && { startTime: studyTime })
+            ...(studyTime && { startTime: studyTime }),
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           });
 
           if (gEvent?.id) {
