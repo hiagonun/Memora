@@ -132,22 +132,32 @@ export function ForgettingCurve() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-16 flex flex-col items-center text-center gap-4"
+          className="mb-20 flex flex-col items-start gap-5 border-l-2 border-sky-500/30 pl-6"
         >
-          <div className="inline-flex items-center gap-2 rounded-full bg-sky-500/10 px-4 py-1.5 ring-1 ring-sky-500/20">
+          <div className="inline-flex items-center gap-2">
             <Brain className="h-4 w-4 text-sky-400" weight="fill" />
-            <span className="text-xs font-semibold uppercase tracking-widest text-sky-400">
-              Neurociência aplicada
+            <span className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
+              Dinâmica de Decaimento Cognitivo
             </span>
           </div>
-          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl max-w-3xl">
-            A ciência que transforma estudo em{" "}
-            <span className="bg-gradient-to-r from-sky-400 to-violet-400 bg-clip-text text-transparent">
-              memória permanente
-            </span>
-          </h2>
+          <motion.h2 
+            className="text-[clamp(2.5rem,4vw,3.5rem)] font-bold tracking-tighter text-white leading-[1.05] max-w-2xl"
+          >
+            {"A falha biológica resolvida via matemática".split(" ").map((word, i) => (
+              <motion.span
+                key={i}
+                initial={{ opacity: 0, y: 15, filter: "blur(4px)" }}
+                whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                className={`inline-block mr-2 ${word === "matemática" ? "bg-gradient-to-r from-sky-400 to-violet-400 bg-clip-text text-transparent" : ""}`}
+              >
+                {word}
+              </motion.span>
+            ))}
+          </motion.h2>
           <p className="max-w-[55ch] text-base leading-relaxed text-zinc-400">
-            Em 1885, Ebbinghaus descobriu que esquecemos 56% do que aprendemos em 1 hora — sem reforço. O Memora usa repetição espaçada para inverter essa curva.
+            O cérebro deleta 56% de informações retidas na primeira hora a menos que ocorra ancoramento físico. A repetição espaçada transforma essa amnésia mecânica da curva de Ebbinghaus em retenção permanente de maneira previsível.
           </p>
         </motion.div>
 

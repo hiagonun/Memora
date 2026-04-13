@@ -6,52 +6,52 @@ import { Star } from "@phosphor-icons/react";
 
 const TESTIMONIALS = [
   {
-    name: "Mariana Costa",
-    role: "Medicina · USP",
-    avatar: "https://picsum.photos/seed/mariana1/150/150",
+    name: "Gabriel V.",
+    role: "Pesquisador · Deep Learning",
+    avatar: "https://picsum.photos/seed/gabriel77/150/150",
     quote:
-      "Usava metodologias complexas por anos, mas o Memora mudou tudo. A integração transparente reduziu minha fricção e a curva de retenção é assustadoramente precisa. Passei em Semiologia com a maior nota.",
-    metric: "+38%",
-    metricLabel: "na nota final",
+      "A densidade técnica exigida pela leitura contínua de papers estava arruinando meu workflow. Integrei meus resumos na infraestrutura do Memora e agora o resgate dos teoremas durante os laboratórios práticos é impecavelmente cirúrgico.",
+    metric: "94.2%",
+    metricLabel: "precisão de resgate",
     rating: 5,
   },
   {
-    name: "Rafael Nunes",
-    role: "Concurso · Auditor Fiscal",
-    avatar: "https://picsum.photos/seed/rafael9/150/150",
+    name: "Dr. Lucas Machado",
+    role: "R1 Neurologia · Unifesp",
+    avatar: "https://picsum.photos/seed/lucas9/150/150",
     quote:
-      "A preparação para fisco exige reter uma montanha de dados desconexos. O algoritmo de repetição distribui as revisões de tal forma que chego na prova lembrando da vírgula da lei.",
-    metric: "3×",
-    metricLabel: "volume de retenção",
+      "Aprender a neuroanatomia do tronco encefálico sem um sistema algorítmico de suporte é insanidade. O aplicativo varreu a necessidade de planear minhas revisões do mapa. Ele obriga o meu cérebro a recuperar os dados minutos antes de eu esquecer ativamente.",
+    metric: "4.5×",
+    metricLabel: "ganho de tempo orgânico",
     rating: 5,
   },
   {
-    name: "Ana Beatriz Lima",
-    role: "Direito · PUC",
-    avatar: "https://picsum.photos/seed/ana22/150/150",
+    name: "Júlia C.",
+    role: "Auditoria Fiscal (Empossada)",
+    avatar: "https://picsum.photos/seed/julia001/150/150",
     quote:
-      "Antes eu lia a jurisprudência e esquecia na semana seguinte. Com o Memora, o problema não era eu, era a falta de sistema. Consolidei artigos inteiros na memória.",
-    metric: "−60%",
-    metricLabel: "tempo gasto re-estudando",
+      "O gap entre falhar no concurso e ficar nas vagas primárias é errar um artigo obscuro na legislação fiscal. A leitura ingênua não serve para nada na via pública; a brutalidade dessa curva matemática segurou minha base teórica à prova de fogo.",
+    metric: "Zero",
+    metricLabel: "perda de jurisprudência passiva",
     rating: 5,
   },
   {
-    name: "Carlos Eduardo",
-    role: "Engenheiro de Software",
-    avatar: "https://picsum.photos/seed/carlos4/150/150",
+    name: "Felipe T.",
+    role: "Engenheiro de Software · Fintech",
+    avatar: "https://picsum.photos/seed/felipe5g/150/150",
     quote:
-      "Estrutura de dados requer aprofundamento. A repetição espaçada funciona incrivelmente bem para reter conceitos técnicos. Consegui a aprovação técnica após 3 meses de uso.",
-    metric: "100%",
-    metricLabel: "sucesso na etapa técnica",
+      "Arquitetura de sistemas distribuídos força sua memória em várias abstrações ao mesmo tempo. A repetição aqui não é um bônus, é pragmatismo defensivo. Consegui cruzar a barreira sênior porque nunca precisei re-aprender o que fechei há seis meses.",
+    metric: "Integral",
+    metricLabel: "absorção estrutural",
     rating: 5,
   },
 ];
 
 const STATS = [
-  { value: 10000, suffix: "+", label: "estudantes" },
-  { value: 92, suffix: "%", label: "retenção observada" },
-  { value: 4.9, suffix: "/5", label: "média das avaliações", decimals: 1 },
-  { value: 38, suffix: "%", label: "aumento médio de notas" },
+  { value: 12400, suffix: "+", label: "cargas ativas diárias" },
+  { value: 94.6, suffix: "%", label: "taxa exata de retenção", decimals: 1 },
+  { value: 4.97, suffix: "", label: "índice algorítmico", decimals: 2 },
+  { value: 3.1, suffix: "×", label: "coeficiente de absorção", decimals: 1 },
 ];
 
 function AnimatedCounter({
@@ -151,19 +151,19 @@ export function Testimonials() {
       </div>
 
       <div className="mx-auto w-full max-w-7xl px-6">
-        {/* Header */}
+        {/* Header Asymmetric Layout */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-16 flex flex-col items-center text-center gap-4"
+          className="mb-20 flex flex-col lg:flex-row items-start justify-between gap-10 border-b border-white/5 pb-10"
         >
-          <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl lg:text-5xl max-w-3xl">
-            Estudantes reais redefinindo seus limites de cognição.
+          <h2 className="text-[clamp(2.5rem,4vw,3.5rem)] font-bold tracking-tighter text-white leading-[1.05] max-w-xl">
+            O paradoxo da hiper-retenção em alto nível.
           </h2>
-          <p className="max-w-[50ch] text-base leading-relaxed text-zinc-400">
-            A adaptação definitiva da ciência da repetição espaçada às necessidades do presente.
+          <p className="max-w-[45ch] text-lg leading-relaxed text-zinc-400 lg:pt-4">
+            Não otimizamos para estudantes passivos. O Memora é a infraestrutura de linha de comando para profissionais lidando com restrições críticas de volume e tempo.
           </p>
         </motion.div>
 
